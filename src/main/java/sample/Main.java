@@ -36,6 +36,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        initSpring();
+
         Group group = new Group();
         primaryStage.setTitle("Mongo db");
         Scene scene = new Scene(group, 1000, 600);
@@ -43,7 +45,6 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         setListView(mElements);
         setFormField(mElements);
-        initSpring();
 
         primaryStage.setResizable(false);
         primaryStage.show();
@@ -60,13 +61,7 @@ public class Main extends Application {
         listView.setId("list");
         listView.setLayoutX(500);
         listView.setPrefWidth(500);
-
-
-        listView.getItems().addAll(
-                "One",
-                "Two",
-                "Three");
-
+        listView.setPrefHeight(600);
         nodeList.add(listView);
     }
 
@@ -104,21 +99,34 @@ public class Main extends Application {
         nodeList.add(field1);
     }
 
-
     private void onGetPressed(ActionEvent event){
-        List<Credentials> credentialses = mTemplate.find(new Query(Criteria.where("firstName").is("HELLO")), Credentials.class);
+//        List<Credentials> credentialses = mTemplate.find(new Query(Criteria.where("").is("")), Credentials.class);
+        List<Credentials> credentialses = mTemplate.findAll(Credentials.class);
 
         System.out.println(credentialses);
     }
 
     private void onSavePressed(ActionEvent event) {
         System.out.println("saved");
+
+        Credentials credentials = new Credentials(getTextById("tfName"), getTextById("tfSurname"));
+        mTemplate.save(credentials);
+        updateList();
+
+    }
+
+
+    private void updateList(){
+
+        List<Credentials> credentialses = mTemplate.findAll(Credentials.class);
+
+
         ListView list = findById("list", ListView.class);
+        list.getItems().clear();
+        for(Credentials c : credentialses){
+            list.getItems().add(c.getFirstName() + "  " + c.getLastName());
+        }
 
-
-        String text =getTextById("tfName") + getTextById("tfSurname");
-
-        list.getItems().add(text);
 
     }
 
