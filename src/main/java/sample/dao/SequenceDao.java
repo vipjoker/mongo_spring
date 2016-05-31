@@ -1,4 +1,4 @@
-package sample;
+package sample.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -6,11 +6,15 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Repository;
+import sample.SequenceExceptions;
 import sample.model.Sequence;
 
 /**
  * Created by oleh on 30.05.16.
  */
+
+@Repository
 public class SequenceDao {
 
     @Autowired

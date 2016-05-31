@@ -13,7 +13,9 @@
         <context:annotation-config/>
 
     <context:component-scan base-package="sample">
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter
+                type="annotation"
+                expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
 
 
@@ -21,10 +23,13 @@
 
     <mongo:mongo host="${mongo.host}" port="${mongo.port}"/>
 
+
+    <!--username="${mongo.username}"-->
+    <!--password="${mongo.password}"-->
+
     <mongo:db-factory
-        username="${mongo.username}"
-        password="${mongo.password}"
-        dbname="{$mongo.db}"
+
+        dbname="${mongo.db}"
         mongo-ref="mongo"/>
 
     <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
