@@ -48,6 +48,7 @@ public class Main extends Application {
 
         primaryStage.setResizable(false);
         primaryStage.show();
+        updateList();
     }
 
     private void initSpring() {
@@ -57,7 +58,7 @@ public class Main extends Application {
     }
 
     private void setListView(List<Node> nodeList) {
-        ListView<String> listView = new ListView<>();
+        ListView<Credentials> listView = new ListView<>();
         listView.setId("list");
         listView.setLayoutX(500);
         listView.setPrefWidth(500);
@@ -87,11 +88,11 @@ public class Main extends Application {
         button.setLayoutY(y +100);
         button.setOnAction(this::onSavePressed);
 
-        Button button1 = new Button("Get");
-        button1.setId("btnGet");
+        Button button1 = new Button("Delete");
+        button1.setId("btnDelete");
         button1.setLayoutX(x + 100);
         button1.setLayoutY(y+ 100);
-        button1.setOnAction(this::onGetPressed);
+        button1.setOnAction(this::onDeletePressed);
 
         nodeList.add(button);
         nodeList.add(button1);
@@ -99,11 +100,11 @@ public class Main extends Application {
         nodeList.add(field1);
     }
 
-    private void onGetPressed(ActionEvent event){
+    private void onDeletePressed(ActionEvent event){
 //        List<Credentials> credentialses = mTemplate.find(new Query(Criteria.where("").is("")), Credentials.class);
-        List<Credentials> credentialses = mTemplate.findAll(Credentials.class);
-
-        System.out.println(credentialses);
+        ListView<Credentials> list = findById("list", ListView.class);
+        Credentials credentials = list.getSelectionModel().getSelectedItem();
+        deleteItem(credentials);
     }
 
     private void onSavePressed(ActionEvent event) {
@@ -115,19 +116,20 @@ public class Main extends Application {
 
     }
 
-
     private void updateList(){
 
         List<Credentials> credentialses = mTemplate.findAll(Credentials.class);
 
-
-        ListView list = findById("list", ListView.class);
+        ListView<Credentials> list = findById("list", ListView.class);
         list.getItems().clear();
         for(Credentials c : credentialses){
-            list.getItems().add(c.getFirstName() + "  " + c.getLastName());
+            list.getItems().add(c);
         }
+    }
 
-
+    private void deleteItem(Credentials credentials){
+        mTemplate.remove(credentials);
+        updateList();
     }
 
     private String getTextById(String id){

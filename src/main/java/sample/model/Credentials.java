@@ -41,8 +41,6 @@ public class Credentials {
 
     @Override
     public String toString(){
-        return String.format(
-                "Credentials [id = %s \n firstName= %s \n , lastName= %s",
-                id,firstName,lastName);
+        return String.format("FirstName= %s , LastName= %s", firstName,lastName);
     }
 }
