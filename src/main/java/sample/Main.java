@@ -58,7 +58,7 @@ public class Main extends Application {
     }
 
     private void setListView(List<Node> nodeList) {
-        ListView<Credentials> listView = new ListView<>();
+        ListView<Credentials> listView = new ListView<Credentials>();
         listView.setId("list");
         listView.setLayoutX(500);
         listView.setPrefWidth(500);
