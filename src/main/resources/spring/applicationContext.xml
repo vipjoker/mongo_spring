@@ -10,13 +10,6 @@
         http://www.springframework.org/schema/data/mongo/spring-mongo.xsd">
 
 
-        <context:annotation-config/>
-
-    <context:component-scan base-package="sample">
-        <context:exclude-filter
-                type="annotation"
-                expression="org.springframework.stereotype.Controller"/>
-    </context:component-scan>
 
 
     <context:property-placeholder location="classpath:database.properties"/>
