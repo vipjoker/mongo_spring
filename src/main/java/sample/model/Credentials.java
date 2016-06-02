@@ -1,42 +1,49 @@
 package sample.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  * Created by oleh on 31.05.16.
  */
 
-@Document(collection = "newCollection")
 public class Credentials {
-    @Id
+
     private String id;
 
-    private String firstName;
-    private String lastName;
+    private StringProperty firstName;
+    private StringProperty lastName;
 
     public Credentials(){}
 
     public Credentials(String firstName, String lastName){
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstName = new SimpleStringProperty(firstName);
+        this.lastName = new SimpleStringProperty(lastName);
     }
 
-
-    public String getFirstName() {
+    public StringProperty firstNameProperty(){
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
+    public StringProperty lastNameProperty(){
         return lastName;
     }
 
+    public String getFirstName() {
+        return firstName.get();
+    }
+
+    public void setFirstName(String firstName) {
+
+        this.firstName.setValue(firstName);
+    }
+
+    public String getLastName() {
+        return lastName.get();
+    }
+
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.lastName.setValue(lastName);
     }
 
     @Override
