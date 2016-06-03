@@ -1,5 +1,8 @@
 package sample.view;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.util.JSON;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,6 +29,8 @@ import java.util.List;
 public class MainView {
 
     private List<Node> mViews;
+    private TextField tfName;
+    private TextField tfLastName;
 
     public MainView(List<Node> nodes) {
         mViews = nodes;
@@ -89,16 +94,16 @@ public class MainView {
         int x = 100;
         int y = 120;
 
-        TextField field = new TextField();
-        field.setId("tfName");
+        tfName= new TextField();
+        tfName.setId("tfName");
 
-        field.setLayoutX(x);
-        field.setLayoutY(y);
+        tfName.setLayoutX(x);
+        tfName.setLayoutY(y);
 
-        TextField field1 = new TextField();
-        field1.setId("tfSurname");
-        field1.setLayoutX(x);
-        field1.setLayoutY(y + 50);
+        tfLastName = new TextField();
+        tfLastName.setId("tfSurname");
+        tfLastName.setLayoutX(x);
+        tfLastName.setLayoutY(y + 50);
 
 
         Button button = new Button("Save");
@@ -115,8 +120,8 @@ public class MainView {
 
         nodes.add(button);
         nodes.add(button1);
-        nodes.add(field);
-        nodes.add(field1);
+        nodes.add(tfName);
+        nodes.add(tfLastName);
     }
 
     private void initTableView(List<Node> nodes) {
@@ -239,22 +244,26 @@ public class MainView {
     private void onSavePressed(ActionEvent event) {
         System.out.println("saved");
 
-        Credentials credentials = new Credentials(getTextById("tfName"), getTextById("tfSurname"));
+        Credentials credentials = new Credentials(tfName.getText(), tfLastName.getText());
+
+        String format = String.format("{'name':'%s', 'age':'%s'}" ,tfName.getText(),tfLastName.getText());
 
         System.out.println("credentials " + credentials);
 
-//        mTemplate.save(credentials);
-      //  updateList();
+        Document document = Document.parse(format);
+
+        Database.getInstance().save(document , KpiProperties.getCollection());
+
 
     }
 
 
     private void onGetPressed(ActionEvent event){
-        for(Document item :Database.getInstance().getAll()){
-            String s = item.toJson();
-            Object parse = JSON.parse(s);
-            System.out.println(parse);
-        }
+
+
+        System.out.println(Database.getInstance().getAllAsJson(KpiProperties.getCollection()));
+
+
     }
 
     private void updateList() {
@@ -262,7 +271,7 @@ public class MainView {
 //        List<Credentials> credentialses = mTemplate.findAll(Credentials.class);
 
 
-        TableView<Person> table = findById(mViews,"table", TableView.class);
+        //TableView<Person> table = findById(mViews,"table", TableView.class);
 
     }
 

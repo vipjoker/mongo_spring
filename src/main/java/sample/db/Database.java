@@ -5,14 +5,11 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-import org.bson.BSON;
 import org.bson.Document;
 import sample.KpiProperties;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Created by oleh on 02.06.16.
@@ -22,39 +19,57 @@ public class Database {
     private static Database INSTANCE;
     private MongoClient mClient;
     private MongoDatabase mDatabase;
-    public static Database getInstance(){
-        if(INSTANCE == null) INSTANCE = new Database();
-        return INSTANCE;
-    }
 
     private Database() {
         mClient = new MongoClient();
         mDatabase = mClient.getDatabase(KpiProperties.getDb());
     }
 
-    public List<String> getDatabases(){
+    public static Database getInstance() {
+        if (INSTANCE == null) INSTANCE = new Database();
+        return INSTANCE;
+    }
+
+    public List<String> getDatabases() {
         List<String> list = new ArrayList<>();
         MongoIterable<String> dbs = mClient.listDatabaseNames();
-        for(String db :dbs)list.add(db);
+        for (String db : dbs) list.add(db);
         return list;
     }
 
-    public List<String> getCollections(){
+    public List<String> getCollections() {
         List<String> list = new ArrayList<>();
-        for(String collection : mDatabase.listCollectionNames())
+        for (String collection : mDatabase.listCollectionNames())
             list.add(collection);
         return list;
     }
 
-    public MongoIterable<Document> getAll(){
+    public MongoIterable<Document> getAll(String collectionName) {
         MongoCollection<Document> collection = mDatabase
-                                                .getCollection(KpiProperties.getCollection());
+                .getCollection(collectionName);
         return collection.find();
     }
 
-    public void save (Document document){
+    public String getAllAsJson(String collectionName) {
+        FindIterable<Document> documents = mDatabase.getCollection(collectionName).find();
+        StringBuilder builder = new StringBuilder("[");
+        for (Document document : documents) {
+            builder.append(document.toJson());
+        }
+        builder.append("]");
+        return builder.toString();
+
+    }
+
+
+    public void saveJson(String json, String collectionName) {
+        mDatabase.getCollection(collectionName)
+                .insertOne(Document.parse(json));
+    }
+
+    public void save(Document document, String collectoinName) {
         mDatabase
-                .getCollection(KpiProperties.getCollection())
+                .getCollection(collectoinName)
                 .insertOne(document);
 
     }
