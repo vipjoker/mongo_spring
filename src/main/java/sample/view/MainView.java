@@ -1,9 +1,13 @@
 package sample.view;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.util.JSON;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,10 +17,12 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
 import org.bson.Document;
 import org.controlsfx.control.Notifications;
 import sample.KpiProperties;
 import sample.db.Database;
+import sample.model.BaseMongoModel;
 import sample.model.Credentials;
 import sample.model.Person;
 
@@ -31,14 +37,12 @@ public class MainView {
     private List<Node> mViews;
     private TextField tfName;
     private TextField tfLastName;
+    private TableView<BaseMongoModel> mTable;
 
     public MainView(List<Node> nodes) {
         mViews = nodes;
-
         initTabPane(nodes);
-
         initTableView(nodes);
-
     }
 
     private void initTabPane(List<Node> nodes) {
@@ -74,8 +78,6 @@ public class MainView {
         nodes.add(pane);
     }
 
-
-
     private void initGetFields(List<Node> nodes){
         Button getBtn = new Button("Get");
         getBtn.setLayoutY(200);
@@ -84,10 +86,6 @@ public class MainView {
         nodes.add(getBtn);
 
     }
-
-
-
-
 
 
     private void initButtons(List<Node> nodes) {
@@ -125,11 +123,11 @@ public class MainView {
     }
 
     private void initTableView(List<Node> nodes) {
-        TableView<Person> table = new TableView<>();
-        table.setId("table");
-        table.setLayoutX(500);
-        table.setPrefWidth(500);
-        table.setPrefHeight(600);
+        mTable= new TableView<>();
+        mTable.setId("table");
+        mTable.setLayoutX(500);
+        mTable.setPrefWidth(500);
+        mTable.setPrefHeight(600);
 
 
         ObservableList<Person> persons = FXCollections.observableArrayList();
@@ -160,21 +158,42 @@ public class MainView {
 //        });
 
 
-        table.setItems(persons);
 
-        TableColumn<Person, String> firstNameCol = new TableColumn<>("First Name");
+        TableColumn<BaseMongoModel, String> firstNameCol = new TableColumn<>("__id__");
         firstNameCol.setPrefWidth(250);
-        firstNameCol.setCellValueFactory(new PropertyValueFactory("firstName"));
+        firstNameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<BaseMongoModel, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<BaseMongoModel, String> param) {
+                return param.getValue().mongoIdProperty();
+            }
+        });
 
-        TableColumn<Person, String> lastNameCol = new TableColumn<>("Last Name");
-        lastNameCol.setCellValueFactory(new PropertyValueFactory("lastName"));
+
+
+        TableColumn<BaseMongoModel, String> lastNameCol = new TableColumn<>("Name");
+        lastNameCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<BaseMongoModel, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<BaseMongoModel, String> param) {
+                return param.getValue().getMongoName();
+            }
+        });
         lastNameCol.setPrefWidth(250);
-        table.getColumns().setAll(firstNameCol, lastNameCol);
 
 
-        nodes.add(table);
+        mTable.getColumns().setAll(firstNameCol,lastNameCol);
+
+
+        nodes.add(mTable);
 
     }
+
+
+    private void updateTable(List<BaseMongoModel> list ){
+
+        mTable.setItems(FXCollections.observableArrayList(list));
+    }
+
+
 
     private void initChooser(List<Node> nodes) {
 
@@ -235,8 +254,11 @@ public class MainView {
 //        Credentials credentials = list.getSelectionModel().getSelectedItem();
 //        deleteItem(credentials);
 //
-//
-        Notifications.create().title("hello").show();
+        BaseMongoModel selectedItem = mTable.getSelectionModel().getSelectedItem();
+        deleteItem(selectedItem);
+
+
+//        Notifications.create().title("hello").show();
 
 
     }
@@ -261,23 +283,25 @@ public class MainView {
     private void onGetPressed(ActionEvent event){
 
 
-        System.out.println(Database.getInstance().getAllAsJson(KpiProperties.getCollection()));
+        String allAsJson = Database.getInstance().getAllAsJson(KpiProperties.getCollection());
 
-
+//        System.out.println(allAsJson);
+//
+        List<BaseMongoModel> credentialses = new Gson().fromJson(allAsJson,new TypeToken<List<BaseMongoModel>>(){}.getType());
+        updateTable(credentialses);
+        System.out.println(credentialses);
     }
 
-    private void updateList() {
-
-//        List<Credentials> credentialses = mTemplate.findAll(Credentials.class);
 
 
-        //TableView<Person> table = findById(mViews,"table", TableView.class);
-
-    }
-
-    private void deleteItem(Credentials credentials) {
+    private void deleteItem(BaseMongoModel model) {
         //  mTemplate.remove(credentials);
-        updateList();
+
+        Object id = model.get_id().get("$oid");
+
+        String s =String.format("{\'_id\':{'$oid' : \'%s\' }}" ,id);
+        Document document = Document.parse(s);
+        Database.getInstance().deleteObject(KpiProperties.getCollection(),document);
     }
 
     private String getTextById(String id) {

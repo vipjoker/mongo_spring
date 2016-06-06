@@ -5,7 +5,9 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
+import org.bson.BSON;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import sample.KpiProperties;
 
 import java.util.ArrayList;
@@ -54,11 +56,20 @@ public class Database {
         FindIterable<Document> documents = mDatabase.getCollection(collectionName).find();
         StringBuilder builder = new StringBuilder("[");
         for (Document document : documents) {
+
             builder.append(document.toJson());
+
+
+            builder.append(",\n");
         }
+        builder.delete(builder.length() - 2,builder.length());
         builder.append("]");
         return builder.toString();
 
+    }
+
+    public void deleteObject(String collection, Document bson){
+        mDatabase.getCollection(collection).deleteOne(bson);
     }
 
 
